@@ -1,0 +1,1286 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Simulador Académico de Trading</title>
+  <style>
+    :root{
+      --bg:#040b18;
+      --bg2:#081125;
+      --panel:#0b1837;
+      --panelSoft:#101f44;
+      --panelCard:#132349;
+      --line:rgba(255,255,255,.08);
+      --line2:rgba(255,255,255,.12);
+      --text:#f4f7ff;
+      --muted:#95a5c8;
+      --blue:#5da8ff;
+      --blue2:#2c78ff;
+      --green:#16c784;
+      --greenBg:rgba(22,199,132,.14);
+      --red:#ff5c77;
+      --redBg:rgba(255,92,119,.14);
+      --yellow:#ffcf5a;
+      --yellowBg:rgba(255,207,90,.14);
+      --shadow:0 16px 34px rgba(0,0,0,.38);
+      --radius:24px;
+      --radiusSm:16px;
+    }
+
+    *{box-sizing:border-box}
+
+    html,body{
+      margin:0;
+      padding:0;
+      background:
+        radial-gradient(circle at top left, rgba(30,70,170,.18), transparent 30%),
+        radial-gradient(circle at top right, rgba(20,60,140,.14), transparent 28%),
+        linear-gradient(180deg,#030916 0%, #071122 100%);
+      color:var(--text);
+      font-family:Inter,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial,sans-serif;
+    }
+
+    body{min-height:100vh}
+
+    .shell{
+      max-width:1500px;
+      margin:0 auto;
+      padding:20px;
+    }
+
+    .topbar{
+      display:grid;
+      grid-template-columns:1.2fr .9fr;
+      gap:18px;
+      margin-bottom:18px;
+    }
+
+    .hero, .top-info, .sidebar-card, .panel{
+      background:linear-gradient(180deg, rgba(13,27,63,.96), rgba(7,18,42,.96));
+      border:1px solid var(--line);
+      border-radius:28px;
+      box-shadow:var(--shadow);
+    }
+
+    .hero{
+      padding:24px 28px;
+      min-height:110px;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:20px;
+    }
+
+    .hero h1{
+      margin:0 0 8px;
+      font-size:34px;
+      letter-spacing:.2px;
+    }
+
+    .hero p{
+      margin:0;
+      color:var(--muted);
+      max-width:720px;
+      line-height:1.55;
+    }
+
+    .hero-badge{
+      padding:10px 14px;
+      border-radius:999px;
+      border:1px solid var(--line2);
+      background:rgba(255,255,255,.03);
+      color:#cfe0ff;
+      font-size:13px;
+      white-space:nowrap;
+    }
+
+    .top-info{
+      padding:20px;
+      display:grid;
+      grid-template-columns:repeat(3,1fr);
+      gap:14px;
+    }
+
+    .mini{
+      background:rgba(255,255,255,.03);
+      border:1px solid var(--line);
+      border-radius:18px;
+      padding:14px 16px;
+    }
+
+    .mini span{
+      display:block;
+      font-size:12px;
+      color:var(--muted);
+      text-transform:uppercase;
+      letter-spacing:.08em;
+      margin-bottom:8px;
+    }
+
+    .mini strong{
+      font-size:24px;
+      line-height:1.1;
+    }
+
+    .layout{
+      display:grid;
+      grid-template-columns:320px 1fr;
+      gap:18px;
+    }
+
+    .sidebar{
+      display:flex;
+      flex-direction:column;
+      gap:18px;
+    }
+
+    .sidebar-card{
+      padding:18px;
+    }
+
+    .section-title{
+      margin:0 0 14px;
+      font-size:13px;
+      color:var(--muted);
+      text-transform:uppercase;
+      letter-spacing:.08em;
+    }
+
+    label{
+      display:block;
+      margin:0 0 8px;
+      color:var(--muted);
+      font-size:12px;
+      text-transform:uppercase;
+      letter-spacing:.08em;
+    }
+
+    select,input,button{
+      width:100%;
+      border:none;
+      outline:none;
+      border-radius:16px;
+      padding:14px 16px;
+      font-size:15px;
+      color:var(--text);
+      background:#182951;
+      border:1px solid rgba(255,255,255,.08);
+    }
+
+    select,input{
+      appearance:none;
+      -webkit-appearance:none;
+      -moz-appearance:none;
+    }
+
+    button{
+      font-weight:700;
+      cursor:pointer;
+      transition:.18s ease;
+    }
+
+    button:hover{transform:translateY(-1px)}
+    button:active{transform:translateY(0)}
+
+    .btn-green{background:linear-gradient(180deg,#103f47,#0b4e4f); border-color:rgba(22,199,132,.25)}
+    .btn-red{background:linear-gradient(180deg,#44213a,#4a1d33); border-color:rgba(255,92,119,.25)}
+    .btn-blue{background:linear-gradient(180deg,#183976,#16346a); border-color:rgba(93,168,255,.22)}
+    .btn-gray{background:linear-gradient(180deg,#2f313b,#2d2e34)}
+    .btn-wide{grid-column:1/-1}
+
+    .btn-grid{
+      display:grid;
+      grid-template-columns:1fr 1fr;
+      gap:10px;
+    }
+
+    .stats-grid{
+      display:grid;
+      grid-template-columns:1fr 1fr;
+      gap:8px;
+      margin-bottom:16px;
+    }
+
+    .stat{
+      background:rgba(255,255,255,.03);
+      border:1px solid var(--line);
+      border-radius:16px;
+      padding:14px;
+      min-height:86px;
+    }
+
+    .stat span{
+      display:block;
+      color:var(--muted);
+      font-size:12px;
+      text-transform:uppercase;
+      letter-spacing:.08em;
+      margin-bottom:8px;
+    }
+
+    .stat strong{
+      display:block;
+      font-size:17px;
+      line-height:1.15;
+    }
+
+    .main{
+      display:flex;
+      flex-direction:column;
+      gap:18px;
+    }
+
+    .panel{
+      padding:18px;
+    }
+
+    .panel-head{
+      display:flex;
+      justify-content:space-between;
+      align-items:flex-start;
+      gap:18px;
+      margin-bottom:14px;
+    }
+
+    .panel-head h2{
+      margin:0 0 6px;
+      font-size:22px;
+    }
+
+    .panel-head p{
+      margin:0;
+      color:#bdd1ff;
+      opacity:.9;
+      line-height:1.45;
+    }
+
+    .pill{
+      padding:10px 14px;
+      border-radius:999px;
+      border:1px solid var(--line2);
+      background:rgba(255,255,255,.03);
+      color:#cfe0ff;
+      font-size:13px;
+      white-space:nowrap;
+    }
+
+    .chart-wrap{
+      position:relative;
+      border-radius:22px;
+      background:linear-gradient(180deg,#0a1738 0%, #091430 100%);
+      border:1px solid var(--line);
+      overflow:hidden;
+      min-height:520px;
+    }
+
+    canvas{
+      display:block;
+      width:100%;
+      height:520px;
+    }
+
+    .empty-state{
+      position:absolute;
+      inset:0;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      color:var(--muted);
+      pointer-events:none;
+      font-size:18px;
+    }
+
+    .summary-boxes{
+      display:grid;
+      grid-template-columns:repeat(4,1fr);
+      gap:12px;
+      margin-top:14px;
+    }
+
+    .summary-box{
+      background:rgba(255,255,255,.03);
+      border:1px solid var(--line);
+      border-radius:18px;
+      padding:14px 16px;
+    }
+
+    .summary-box span{
+      display:block;
+      color:var(--muted);
+      font-size:12px;
+      text-transform:uppercase;
+      letter-spacing:.08em;
+      margin-bottom:6px;
+    }
+
+    .summary-box strong{
+      font-size:16px;
+    }
+
+    .table-wrap{
+      overflow:auto;
+      border-radius:20px;
+      border:1px solid var(--line);
+      background:linear-gradient(180deg,#091631 0%, #08142c 100%);
+    }
+
+    .table-wrap.medium{max-height:260px}
+    .table-wrap.large{max-height:430px}
+
+    table{
+      width:100%;
+      min-width:1100px;
+      border-collapse:collapse;
+    }
+
+    thead th{
+      position:sticky;
+      top:0;
+      z-index:2;
+      background:#102044;
+      color:#d7e5ff;
+      text-align:left;
+      font-size:13px;
+      padding:14px 14px;
+      border-bottom:1px solid var(--line2);
+      text-transform:uppercase;
+      letter-spacing:.06em;
+    }
+
+    tbody td{
+      padding:12px 14px;
+      border-bottom:1px solid rgba(255,255,255,.05);
+      font-size:14px;
+      white-space:nowrap;
+    }
+
+    tbody tr:hover{
+      background:rgba(255,255,255,.03);
+    }
+
+    .pos{color:var(--green); font-weight:700}
+    .neg{color:var(--red); font-weight:700}
+    .neu{color:var(--yellow); font-weight:700}
+
+    .modal{
+      position:fixed;
+      inset:0;
+      background:rgba(0,0,0,.58);
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      padding:20px;
+      z-index:50;
+    }
+
+    .modal.hidden{display:none}
+
+    .modal-card{
+      width:min(520px,100%);
+      background:linear-gradient(180deg,#112044,#0b1837);
+      border:1px solid var(--line2);
+      border-radius:24px;
+      box-shadow:var(--shadow);
+      padding:22px;
+    }
+
+    .modal-card h3{
+      margin:0 0 10px;
+      font-size:24px;
+    }
+
+    .modal-card p{
+      margin:0 0 18px;
+      color:#d6e2ff;
+      line-height:1.65;
+      white-space:pre-line;
+    }
+
+    .help{
+      margin-top:10px;
+      color:var(--muted);
+      font-size:13px;
+      line-height:1.5;
+    }
+
+    @media (max-width:1200px){
+      .topbar{grid-template-columns:1fr}
+      .layout{grid-template-columns:1fr}
+      .summary-boxes{grid-template-columns:1fr 1fr}
+    }
+
+    @media (max-width:800px){
+      .stats-grid{grid-template-columns:1fr 1fr}
+      .summary-boxes{grid-template-columns:1fr}
+      .top-info{grid-template-columns:1fr}
+      .hero{flex-direction:column; align-items:flex-start}
+    }
+  </style>
+</head>
+<body>
+  <div class="shell">
+    <div class="topbar">
+      <section class="hero">
+        <div>
+          <h1>Simulador de Trading Académico</h1>
+          <p>
+            Demo visual con datos históricos de Starbucks, PepsiCo, Walmart, Amazon y Microsoft.
+            Puedes recorrer el flujo completo, marcar compras y ventas, revisar resultados y evaluar si una fecha pasada convenía para entrar o salir.
+          </p>
+        </div>
+        <div class="hero-badge">HTML único · sin APIs · listo para exponer</div>
+      </section>
+
+      <section class="top-info">
+        <div class="mini">
+          <span>Empresa activa</span>
+          <strong id="topCompany">Starbucks</strong>
+        </div>
+        <div class="mini">
+          <span>Última fecha</span>
+          <strong id="topDate">-</strong>
+        </div>
+        <div class="mini">
+          <span>Precio actual</span>
+          <strong id="topPrice">-</strong>
+        </div>
+      </section>
+    </div>
+
+    <div class="layout">
+      <aside class="sidebar">
+        <section class="sidebar-card">
+          <h3 class="section-title">Empresa</h3>
+          <label for="companySelect">Seleccionar empresa</label>
+          <select id="companySelect"></select>
+
+          <h3 class="section-title" style="margin-top:16px;">Estado</h3>
+          <div class="stats-grid">
+            <div class="stat"><span>Última fecha</span><strong id="latestDate">-</strong></div>
+            <div class="stat"><span>Precio actual</span><strong id="currentPrice">-</strong></div>
+            <div class="stat"><span>Variación diaria</span><strong id="currentVariation">-</strong></div>
+            <div class="stat"><span>Posición</span><strong id="positionStatus">Sin posición</strong></div>
+            <div class="stat"><span>Capital</span><strong id="capitalBox">$1000.00</strong></div>
+            <div class="stat"><span>PNL</span><strong id="pnlBox">$0.00</strong></div>
+            <div class="stat"><span>Operaciones</span><strong id="operationsBox">0</strong></div>
+            <div class="stat"><span>Win rate</span><strong id="winRateBox">0%</strong></div>
+          </div>
+
+          <h3 class="section-title">Controles</h3>
+          <label for="capitalInput">Capital inicial</label>
+          <input id="capitalInput" type="number" min="100" step="100" value="1000" />
+
+          <div class="btn-grid" style="margin-top:10px;">
+            <button id="buyBtn" class="btn-green">Comprar</button>
+            <button id="sellBtn" class="btn-red">Vender</button>
+            <button id="nextBtn" class="btn-blue">Siguiente día</button>
+            <button id="resetBtn" class="btn-gray">Reiniciar</button>
+            <button id="autoBtn" class="btn-blue btn-wide">Simular estrategia completa</button>
+          </div>
+
+          <h3 class="section-title" style="margin-top:16px;">Evaluar si convenía comprar o vender</h3>
+          <label for="analysisDate">Fecha histórica</label>
+          <select id="analysisDate"></select>
+          <button id="analyzeBtn" class="btn-blue" style="margin-top:10px;">Analizar fecha</button>
+
+          <div class="help" id="analysisResult">
+            Selecciona una fecha para revisar la recomendación simple y el mejor punto futuro de salida.
+          </div>
+        </section>
+      </aside>
+
+      <main class="main">
+        <section class="panel">
+          <div class="panel-head">
+            <div>
+              <h2>Gráfico</h2>
+              <p>
+                Velas sintéticas construidas con el precio anterior y el precio actual para dar una vista estilo trading con todo el flujo.
+              </p>
+            </div>
+            <div class="pill" id="stepPill">Paso 1 / 1</div>
+          </div>
+
+          <div class="chart-wrap">
+            <canvas id="chartCanvas" width="1200" height="520"></canvas>
+            <div class="empty-state" id="emptyChart">Cargando datos...</div>
+          </div>
+        </section>
+
+        <section class="panel">
+          <div class="panel-head">
+            <div>
+              <h2>Resumen de simulación</h2>
+              <p>Consolidado de resultados de las operaciones ejecutadas.</p>
+            </div>
+          </div>
+
+          <div class="summary-boxes">
+            <div class="summary-box"><span>Capital inicial</span><strong id="initialCapital">$1000.00</strong></div>
+            <div class="summary-box"><span>Capital final</span><strong id="finalCapital">$1000.00</strong></div>
+            <div class="summary-box"><span>Ganadas</span><strong id="winsCount">0</strong></div>
+            <div class="summary-box"><span>Perdidas</span><strong id="lossCount">0</strong></div>
+          </div>
+        </section>
+
+        <section class="panel">
+          <div class="panel-head">
+            <div>
+              <h2>Historial de operaciones</h2>
+              <p>Registro de compras y ventas realizadas durante la simulación.</p>
+            </div>
+          </div>
+
+          <div class="table-wrap medium">
+            <table id="tradesTable">
+              <thead>
+                <tr>
+                  <th>Empresa</th>
+                  <th>Fecha compra</th>
+                  <th>Precio compra</th>
+                  <th>Fecha venta</th>
+                  <th>Precio venta</th>
+                  <th>Resultado</th>
+                  <th>Rentabilidad %</th>
+                </tr>
+              </thead>
+              <tbody></tbody>
+            </table>
+          </div>
+        </section>
+
+        <section class="panel">
+          <div class="panel-head">
+            <div>
+              <h2>Tabla completa del Excel</h2>
+              <p>Todos los datos originales cargados y ordenados por fecha.</p>
+            </div>
+          </div>
+
+          <div class="table-wrap large">
+            <table id="dataTable">
+              <thead></thead>
+              <tbody></tbody>
+            </table>
+          </div>
+        </section>
+      </main>
+    </div>
+  </div>
+
+  <div class="modal hidden" id="modal">
+    <div class="modal-card">
+      <h3 id="modalTitle">Resultado</h3>
+      <p id="modalText"></p>
+      <button id="closeModal">Cerrar</button>
+    </div>
+  </div>
+
+  <script>
+    const rawTSV = `DATE\tStarbucks Price\tPepsiCo Price\tWalmart Price\tAmazon Price\tMicrosoft Price\tRENTABILIDAD\t%Starbucks\t% PepsiCo\t% Walmart\t% Amazon\t% Microsoft
+01-01-2021\t96.81\t136.57\t126.70\t160.31\t231.96\t\t-9,51%\t-7,91%\t1,95%\t-1,56%\t4,29%
+02-01-2021\t108.03\t129.19\t124.28\t154.65\t232.38\t\t11,59%\t-5,40%\t-2,87%\t-3,53%\t0,18%
+03-01-2021\t109.27\t141.45\t127.95\t154.70\t235.77\t\t1,15%\t9,49%\t7,39%\t0,04%\t1,46%
+04-01-2021\t114.49\t144.16\t119.14\t173.37\t252.18\t\t4,78%\t1,92%\t6,94%\t12,07%\t6,96%
+05-01-2021\t113.88\t147.94\t111.41\t161.15\t249.68\t\t-0,53%\t2,62%\t0,81%\t-7,05%\t-0,99%
+06-01-2021\t111.81\t148.17\t110.51\t172.01\t270.90\t\t-1,82%\t0,16%\t9,22%\t6,74%\t8,50%
+07-01-2021\t121.43\t156.95\t101.18\t166.38\t284.91\t\t8,60%\t5,93%\t-1,82%\t-3,27%\t5,17%
+08-01-2021\t117.49\t156.39\t103.06\t173.54\t301.88\t\t-3,24%\t-0,36%\t6,27%\t4,30%\t5,96%
+09-01-2021\t110.31\t150.41\t96.98\t164.25\t281.92\t\t-6,11%\t-3,82%\t-1,02%\t-5,35%\t-6,61%
+10-01-2021\t106.07\t161.60\t97.98\t168.62\t331.62\t\t-3,84%\t7,44%\t0,20%\t2,66%\t17,63%
+11-01-2021\t109.64\t159.78\t97.78\t175.35\t330.59\t\t3,37%\t-1,13%\t-0,95%\t3,99%\t-0,31%
+12-01-2021\t116.97\t173.71\t98.72\t166.72\t336.32\t\t6,69%\t8,72%\t1,51%\t-4,93%\t1,73%
+01-01-2022\t98.32\t173.52\t97.25\t149.57\t310.98\t\t-15,94%\t-0,11%\t10,78%\t-10,28%\t-7,53%
+02-01-2022\t91.79\t163.74\t87.79\t153.56\t298.79\t\t-6,64%\t-5,64%\t-10,97%\t2,67%\t-3,92%
+03-01-2022\t90.97\t167.38\t98.61\t163.00\t308.31\t\t-0,89%\t2,22%\t0,46%\t6,14%\t3,19%
+04-01-2022\t74.64\t171.71\t98.16\t124.28\t277.52\t\t-17,95%\t2,59%\t8,64%\t-23,75%\t-9,99%
+05-01-2022\t78.50\t167.75\t90.35\t120.21\t271.87\t\t5,17%\t-2,31%\t-2,32%\t-3,28%\t-2,04%
+06-01-2022\t76.39\t166.66\t92.50\t106.21\t256.83\t\t-2,69%\t-0,65%\t12,87%\t-11,65%\t-5,53%
+07-01-2022\t84.78\t174.96\t81.95\t134.95\t280.74\t\t10,98%\t4,98%\t1,49%\t27,06%\t9,31%
+08-01-2022\t84.07\t172.27\t80.75\t126.77\t261.47\t\t-0,84%\t-1,54%\t4,56%\t-6,06%\t-6,86%
+09-01-2022\t84.26\t163.26\t77.23\t113.00\t232.90\t\t0,23%\t-5,23%\t12,51%\t-10,86%\t-10,93%
+10-01-2022\t86.59\t181.58\t68.64\t102.44\t232.13\t\t2,77%\t11,22%\t1,37%\t-9,35%\t-0,33%
+11-01-2022\t102.20\t185.51\t67.71\t96.54\t255.14\t\t18,03%\t2,16%\t2,97%\t-5,76%\t9,91%
+12-01-2022\t99.20\t180.66\t65.76\t84.00\t239.82\t\t-2,94%\t-2,61%\t10,80%\t-12,99%\t-6,00%
+01-01-2023\t109.14\t171.02\t59.35\t103.13\t247.81\t\t10,02%\t-5,34%\t-1,36%\t22,77%\t3,33%
+02-01-2023\t102.09\t173.53\t60.17\t94.23\t249.42\t\t-6,46%\t1,47%\t2,66%\t-8,63%\t0,65%
+03-01-2023\t104.13\t182.30\t58.61\t103.29\t288.30\t\t2,00%\t5,05%\t6,40%\t9,61%\t15,59%
+04-01-2023\t114.29\t190.89\t55.08\t105.45\t307.26\t\t9,76%\t4,71%\t4,82%\t2,09%\t6,58%
+05-01-2023\t97.64\t182.35\t52.55\t120.58\t328.39\t\t-14,57%\t-4,47%\t1,26%\t14,35%\t6,88%
+06-01-2023\t99.06\t185.22\t51.90\t130.36\t340.54\t\t1,45%\t1,57%\t-4,72%\t8,11%\t3,70%
+07-01-2023\t101.57\t187.46\t54.47\t133.68\t335.92\t\t2,53%\t1,21%\t2,18%\t2,55%\t-1,36%
+08-01-2023\t97.44\t177.92\t53.31\t138.01\t327.76\t\t-4,07%\t-5,09%\t-1,65%\t3,24%\t-2,43%
+09-01-2023\t91.27\t169.44\t54.20\t127.12\t315.75\t\t-6,33%\t-4,77%\t1,72%\t-7,89%\t-3,66%
+10-01-2023\t92.24\t163.28\t53.29\t133.09\t338.11\t\t1,06%\t-3,64%\t1,71%\t4,70%\t7,08%
+11-01-2023\t99.30\t168.29\t52.39\t146.09\t378.91\t\t7,65%\t3,07%\t7,02%\t9,77%\t12,07%
+12-01-2023\t96.01\t169.84\t48.96\t151.94\t376.04\t\t-3,31%\t0,92%\t-2,72%\t4,00%\t-0,76%
+01-01-2024\t93.03\t168.53\t50.32\t155.20\t397.58\t\t-3,10%\t-0,77%\t2,39%\t2,15%\t5,73%
+02-01-2024\t94.90\t165.34\t49.15\t176.76\t413.64\t\t2,01%\t-1,89%\t3,74%\t13,89%\t4,04%
+03-01-2024\t91.39\t175.01\t47.38\t180.38\t420.72\t\t-3,70%\t5,85%\t-1,21%\t2,05%\t1,71%
+04-01-2024\t88.49\t175.91\t47.96\t175.00\t389.33\t\t-3,17%\t0,51%\t1,47%\t-2,98%\t-7,46%
+05-01-2024\t80.22\t172.90\t47.26\t176.44\t415.13\t\t-9,35%\t-1,71%\t-6,97%\t0,82%\t6,63%
+06-01-2024\t77.85\t164.93\t50.81\t193.25\t446.95\t\t-2,95%\t-4,61%\t7,09%\t9,53%\t7,67%
+07-01-2024\t77.95\t172.67\t47.44\t186.98\t418.35\t\t0,13%\t4,69%\t9,74%\t-3,24%\t-6,40%
+08-01-2024\t94.57\t172.88\t43.23\t178.50\t417.14\t\t21,32%\t0,12%\t-2,15%\t-4,54%\t-0,29%
+09-01-2024\t97.49\t170.05\t44.18\t186.33\t430.30\t\t3,09%\t-1,64%\t0,38%\t4,39%\t3,15%
+10-01-2024\t97.70\t166.08\t44.02\t186.40\t406.35\t\t0,22%\t-2,33%\t8,61%\t0,04%\t-5,57%
+11-01-2024\t102.46\t163.45\t40.53\t207.89\t423.46\t\t4,87%\t-1,58%\t-5,48%\t11,53%\t4,21%
+12-01-2024\t91.25\t152.06\t42.88\t219.39\t421.50\t\t-10,94%\t-6,97%\t-15,92%\t5,53%\t-0,46%
+01-01-2025\t107.68\t150.69\t51.00\t237.68\t415.06\t\t18,01%\t-0,90%\t2,73%\t8,34%\t-1,53%
+02-01-2025\t115.81\t153.47\t49.64\t212.28\t396.99\t\t7,55%\t1,84%\t10,18%\t-10,69%\t-4,35%
+03-01-2025\t98.09\t149.94\t45.05\t190.26\t375.39\t\t-15,30%\t-2,30%\t-3,33%\t-10,37%\t-5,44%
+04-01-2025\t80.05\t135.58\t46.60\t184.42\t395.26\t\t-18,39%\t-9,58%\t-3,37%\t-3,07%\t5,29%
+05-01-2025\t83.95\t131.45\t48.23\t205.01\t460.36\t\t4,87%\t-3,05%\t2,89%\t11,16%\t16,47%
+06-01-2025\t91.63\t132.04\t46.88\t219.39\t497.41\t\t9,15%\t0,45%\t-5,88%\t7,01%\t8,05%
+07-01-2025\t89.16\t137.92\t49.81\t234.11\t533.50\t\t-2,70%\t4,45%\t7,20%\t6,71%\t7,26%
+08-01-2025\t88.19\t148.65\t46.46\t229.00\t506.69\t\t-1,09%\t7,78%\t-5,89%\t-2,18%\t-5,03%
+09-01-2025\t84.60\t140.44\t49.37\t219.57\t517.95\t\t-4,07%\t-5,52%\t3,89%\t-4,12%\t2,22%
+10-01-2025\t80.87\t146.09\t47.52\t244.22\t517.81\t\t-4,41%\t4,02%\t1,08%\t11,23%\t-0,03%
+11-01-2025\t87.11\t148.74\t47.01\t233.22\t492.01\t\t7,72%\t1,81%\t-0,71%\t-4,50%\t-4,98%
+12-01-2025\t84.21\t143.52\t47.34\t230.82\t483.62\t\t-3,33%\t-3,51%\t1,52%\t-1,03%\t-1,71%
+01-01-2026\t91.95\t153.63\t46.64\t239.30\t430.29\t\t9,19%\t7,04%\t3,00%\t3,67%\t-11,03%
+02-01-2026\t98.02\t169.74\t45.28\t210.00\t392.74\t\t6,60%\t10,49%\t4,55%\t-12,24%\t-8,73%
+03-01-2026\t89.59\t155.29\t43.31\t208.27\t370.17\t\t-8,60%\t-8,51%\t-7,52%\t-0,82%\t-5,75%
+04-01-2026\t94.38\t156.49\t46.83\t212.34\t372.64\t\t5,35%\t0,77%\t-2,54%\t1,95%\t0,67%`;
+
+    const COMPANY_CONFIG = {
+      "Starbucks": { priceKey: "Starbucks Price", pctKey: "%Starbucks", color: "#5da8ff" },
+      "PepsiCo": { priceKey: "PepsiCo Price", pctKey: "% PepsiCo", color: "#8fd3ff" },
+      "Walmart": { priceKey: "Walmart Price", pctKey: "% Walmart", color: "#7dffa6" },
+      "Amazon": { priceKey: "Amazon Price", pctKey: "% Amazon", color: "#ffcf5a" },
+      "Microsoft": { priceKey: "Microsoft Price", pctKey: "% Microsoft", color: "#c296ff" }
+    };
+
+    const state = {
+      rows: [],
+      selectedCompany: "Starbucks",
+      currentIndex: 0,
+      initialCapital: 1000,
+      cash: 1000,
+      shares: 0,
+      openTrade: null,
+      trades: [],
+      markers: []
+    };
+
+    const els = {
+      companySelect: document.getElementById("companySelect"),
+      analysisDate: document.getElementById("analysisDate"),
+      analyzeBtn: document.getElementById("analyzeBtn"),
+      analysisResult: document.getElementById("analysisResult"),
+      capitalInput: document.getElementById("capitalInput"),
+      buyBtn: document.getElementById("buyBtn"),
+      sellBtn: document.getElementById("sellBtn"),
+      nextBtn: document.getElementById("nextBtn"),
+      resetBtn: document.getElementById("resetBtn"),
+      autoBtn: document.getElementById("autoBtn"),
+      latestDate: document.getElementById("latestDate"),
+      currentPrice: document.getElementById("currentPrice"),
+      currentVariation: document.getElementById("currentVariation"),
+      positionStatus: document.getElementById("positionStatus"),
+      capitalBox: document.getElementById("capitalBox"),
+      pnlBox: document.getElementById("pnlBox"),
+      operationsBox: document.getElementById("operationsBox"),
+      winRateBox: document.getElementById("winRateBox"),
+      initialCapital: document.getElementById("initialCapital"),
+      finalCapital: document.getElementById("finalCapital"),
+      winsCount: document.getElementById("winsCount"),
+      lossCount: document.getElementById("lossCount"),
+      topCompany: document.getElementById("topCompany"),
+      topDate: document.getElementById("topDate"),
+      topPrice: document.getElementById("topPrice"),
+      stepPill: document.getElementById("stepPill"),
+      tradesTable: document.querySelector("#tradesTable tbody"),
+      dataTableHead: document.querySelector("#dataTable thead"),
+      dataTableBody: document.querySelector("#dataTable tbody"),
+      chartCanvas: document.getElementById("chartCanvas"),
+      emptyChart: document.getElementById("emptyChart"),
+      modal: document.getElementById("modal"),
+      modalTitle: document.getElementById("modalTitle"),
+      modalText: document.getElementById("modalText"),
+      closeModal: document.getElementById("closeModal")
+    };
+
+    function parseTSV(tsv){
+      const lines = tsv.trim().split("\n");
+      const headers = lines[0].split("\t");
+      return lines.slice(1).map(line=>{
+        const cols = line.split("\t");
+        const obj = {};
+        headers.forEach((h,i)=>obj[h]=cols[i] ?? "");
+        return obj;
+      }).sort((a,b)=>toDate(a.DATE)-toDate(b.DATE));
+    }
+
+    function parseNumber(value){
+      if(value === null || value === undefined || value === "") return NaN;
+      return Number(String(value).replace(/\./g, ".").replace(",", ".").replace(/[^\d.-]/g,""));
+    }
+
+    function parsePercent(value){
+      if(!value) return 0;
+      return parseNumber(String(value).replace("%",""));
+    }
+
+    function toDate(str){
+      const [d,m,y] = str.split("-").map(Number);
+      return new Date(y, m-1, d);
+    }
+
+    function money(n){
+      return n.toLocaleString("en-US",{style:"currency",currency:"USD",minimumFractionDigits:2,maximumFractionDigits:2});
+    }
+
+    function num(n){
+      return Number(n).toLocaleString("en-US",{minimumFractionDigits:2,maximumFractionDigits:2});
+    }
+
+    function pct(n){
+      const sign = n > 0 ? "+" : "";
+      return `${sign}${n.toFixed(2)}%`;
+    }
+
+    function cls(n){
+      if(n > 0) return "pos";
+      if(n < 0) return "neg";
+      return "neu";
+    }
+
+    function getCurrentSeries(){
+      const conf = COMPANY_CONFIG[state.selectedCompany];
+      return state.rows.map(r=>({
+        date:r.DATE,
+        price:parseNumber(r[conf.priceKey]),
+        variation:parsePercent(r[conf.pctKey])
+      }));
+    }
+
+    function getCurrentPoint(){
+      return getCurrentSeries()[state.currentIndex];
+    }
+
+    function getPortfolioValue(index = state.currentIndex){
+      const series = getCurrentSeries();
+      const current = series[index];
+      if(!current) return state.cash;
+      if(state.openTrade){
+        return state.openTrade.shares * current.price;
+      }
+      return state.cash;
+    }
+
+    function init(){
+      state.rows = parseTSV(rawTSV);
+      populateSelects();
+      renderDataTable();
+      resetSimulation(false);
+      bindEvents();
+      updateUI();
+      drawChart();
+      els.emptyChart.style.display = "none";
+    }
+
+    function populateSelects(){
+      Object.keys(COMPANY_CONFIG).forEach(company=>{
+        const option = document.createElement("option");
+        option.value = company;
+        option.textContent = company;
+        els.companySelect.appendChild(option);
+      });
+      els.companySelect.value = state.selectedCompany;
+      fillAnalysisDates();
+    }
+
+    function fillAnalysisDates(){
+      const series = getCurrentSeries();
+      els.analysisDate.innerHTML = "";
+      series.forEach((row, index)=>{
+        const option = document.createElement("option");
+        option.value = index;
+        option.textContent = row.date;
+        els.analysisDate.appendChild(option);
+      });
+      els.analysisDate.value = String(state.currentIndex);
+    }
+
+    function bindEvents(){
+      els.companySelect.addEventListener("change", ()=>{
+        state.selectedCompany = els.companySelect.value;
+        state.currentIndex = getCurrentSeries().length - 1;
+        resetSimulation(false);
+        fillAnalysisDates();
+        updateUI();
+        drawChart();
+      });
+
+      els.capitalInput.addEventListener("change", ()=>{
+        const v = Number(els.capitalInput.value);
+        if(Number.isFinite(v) && v > 0){
+          state.initialCapital = v;
+          if(!state.openTrade && state.trades.length === 0){
+            state.cash = v;
+          }
+          updateUI();
+        }
+      });
+
+      els.buyBtn.addEventListener("click", buy);
+      els.sellBtn.addEventListener("click", sell);
+      els.nextBtn.addEventListener("click", nextDay);
+      els.resetBtn.addEventListener("click", ()=>resetSimulation(true));
+      els.autoBtn.addEventListener("click", autoStrategy);
+      els.analyzeBtn.addEventListener("click", analyzeDate);
+      els.closeModal.addEventListener("click", hideModal);
+    }
+
+    function resetSimulation(showPopup){
+      state.initialCapital = Number(els.capitalInput.value) || 1000;
+      state.cash = state.initialCapital;
+      state.shares = 0;
+      state.openTrade = null;
+      state.trades = [];
+      state.markers = [];
+      state.currentIndex = 0;
+      els.analysisDate.value = "0";
+      renderTrades();
+      updateUI();
+      drawChart();
+      if(showPopup){
+        showModal("Simulación reiniciada", "Se restableció el capital inicial y se borró el historial de operaciones.");
+      }
+    }
+
+    function buy(){
+      const point = getCurrentPoint();
+      if(!point) return;
+      if(state.openTrade){
+        showModal("Posición ya abierta", "Ya tienes una compra activa. Primero debes vender para cerrar la operación.");
+        return;
+      }
+      const shares = state.cash / point.price;
+      state.openTrade = {
+        company: state.selectedCompany,
+        buyDate: point.date,
+        buyPrice: point.price,
+        shares
+      };
+      state.cash = 0;
+      state.markers.push({ type:"buy", index:state.currentIndex, price:point.price, date:point.date });
+      updateUI();
+      drawChart();
+      showModal(
+        "Compra ejecutada",
+        `Has comprado ${state.selectedCompany} el ${point.date} a ${money(point.price)}.\n\nAcciones simuladas: ${shares.toFixed(4)}`
+      );
+    }
+
+    function sell(){
+      const point = getCurrentPoint();
+      if(!point) return;
+      if(!state.openTrade){
+        showModal("No hay posición abierta", "Primero debes comprar para luego poder vender.");
+        return;
+      }
+
+      const buyValue = state.openTrade.shares * state.openTrade.buyPrice;
+      const sellValue = state.openTrade.shares * point.price;
+      const result = sellValue - buyValue;
+      const rent = (result / buyValue) * 100;
+
+      state.cash = sellValue;
+      state.trades.push({
+        company: state.selectedCompany,
+        buyDate: state.openTrade.buyDate,
+        buyPrice: state.openTrade.buyPrice,
+        sellDate: point.date,
+        sellPrice: point.price,
+        result,
+        rent
+      });
+      state.markers.push({ type:"sell", index:state.currentIndex, price:point.price, date:point.date });
+      state.openTrade = null;
+
+      renderTrades();
+      updateUI();
+      drawChart();
+
+      showModal(
+        result >= 0 ? "Venta con ganancia" : "Venta con pérdida",
+        `Vendiste ${state.selectedCompany} el ${point.date} a ${money(point.price)}.\n\nResultado: ${money(result)}\nRentabilidad: ${pct(rent)}`
+      );
+    }
+
+    function nextDay(){
+      const lastIndex = getCurrentSeries().length - 1;
+      if(state.currentIndex < lastIndex){
+        state.currentIndex++;
+        els.analysisDate.value = String(state.currentIndex);
+        updateUI();
+        drawChart();
+      }else{
+        showModal("Límite alcanzado", "Ya estás en la última fecha del histórico disponible.");
+      }
+    }
+
+    function autoStrategy(){
+      resetSimulation(false);
+      const series = getCurrentSeries();
+
+      for(let i=0;i<series.length;i++){
+        state.currentIndex = i;
+        const row = series[i];
+
+        if(!state.openTrade && row.variation > 0){
+          const shares = state.cash / row.price;
+          state.openTrade = {
+            company: state.selectedCompany,
+            buyDate: row.date,
+            buyPrice: row.price,
+            shares
+          };
+          state.cash = 0;
+          state.markers.push({ type:"buy", index:i, price:row.price, date:row.date });
+        } else if(state.openTrade && row.variation < 0){
+          const buyValue = state.openTrade.shares * state.openTrade.buyPrice;
+          const sellValue = state.openTrade.shares * row.price;
+          const result = sellValue - buyValue;
+          const rent = (result / buyValue) * 100;
+
+          state.cash = sellValue;
+          state.trades.push({
+            company: state.selectedCompany,
+            buyDate: state.openTrade.buyDate,
+            buyPrice: state.openTrade.buyPrice,
+            sellDate: row.date,
+            sellPrice: row.price,
+            result,
+            rent
+          });
+          state.markers.push({ type:"sell", index:i, price:row.price, date:row.date });
+          state.openTrade = null;
+        }
+      }
+
+      if(state.openTrade){
+        const row = series[series.length - 1];
+        state.currentIndex = series.length - 1;
+        const buyValue = state.openTrade.shares * state.openTrade.buyPrice;
+        const sellValue = state.openTrade.shares * row.price;
+        const result = sellValue - buyValue;
+        const rent = (result / buyValue) * 100;
+
+        state.cash = sellValue;
+        state.trades.push({
+          company: state.selectedCompany,
+          buyDate: state.openTrade.buyDate,
+          buyPrice: state.openTrade.buyPrice,
+          sellDate: row.date,
+          sellPrice: row.price,
+          result,
+          rent
+        });
+        state.markers.push({ type:"sell", index:series.length - 1, price:row.price, date:row.date });
+        state.openTrade = null;
+      }
+
+      state.currentIndex = series.length - 1;
+      els.analysisDate.value = String(state.currentIndex);
+      renderTrades();
+      updateUI();
+      drawChart();
+
+      showModal(
+        "Estrategia completada",
+        `La simulación automática terminó en ${state.selectedCompany}.\n\nCapital final: ${money(getPortfolioValue())}\nOperaciones cerradas: ${state.trades.length}`
+      );
+    }
+
+    function analyzeDate(){
+      const index = Number(els.analysisDate.value);
+      const series = getCurrentSeries();
+      const row = series[index];
+      const last = series[series.length - 1];
+
+      if(!row) return;
+
+      let recommendation = "Mantener";
+      if(row.variation > 0) recommendation = "Comprar";
+      else if(row.variation < 0) recommendation = "Vender";
+
+      let bestFuture = null;
+      for(let i=index+1;i<series.length;i++){
+        const gain = ((series[i].price - row.price) / row.price) * 100;
+        if(!bestFuture || gain > bestFuture.gain){
+          bestFuture = {
+            date: series[i].date,
+            price: series[i].price,
+            gain
+          };
+        }
+      }
+
+      const holdToLast = ((last.price - row.price) / row.price) * 100;
+
+      els.analysisResult.innerHTML = `
+        <strong style="display:block;color:#fff;margin-bottom:8px;">${state.selectedCompany} · ${row.date}</strong>
+        Precio: <span>${money(row.price)}</span><br>
+        Variación diaria: <span class="${cls(row.variation)}">${pct(row.variation)}</span><br>
+        Recomendación simple: <strong>${recommendation}</strong><br>
+        Resultado si mantenías hasta la última fecha (${last.date}): <span class="${cls(holdToLast)}">${pct(holdToLast)}</span><br>
+        ${
+          bestFuture
+            ? `Mejor punto futuro de venta: <strong>${bestFuture.date}</strong> a <strong>${money(bestFuture.price)}</strong> (<span class="${cls(bestFuture.gain)}">${pct(bestFuture.gain)}</span>)`
+            : `No hay fechas futuras para analizar.`
+        }
+      `;
+    }
+
+    function updateUI(){
+      const series = getCurrentSeries();
+      const point = getCurrentPoint();
+      const lastPoint = series[series.length - 1];
+      const currentPortfolio = getPortfolioValue();
+
+      const wins = state.trades.filter(t=>t.result > 0).length;
+      const losses = state.trades.filter(t=>t.result <= 0).length;
+      const winRate = state.trades.length ? (wins / state.trades.length) * 100 : 0;
+      const pnl = currentPortfolio - state.initialCapital;
+
+      els.latestDate.textContent = lastPoint ? lastPoint.date : "-";
+      els.currentPrice.textContent = point ? money(point.price) : "-";
+      els.currentVariation.innerHTML = point ? `<span class="${cls(point.variation)}">${pct(point.variation)}</span>` : "-";
+      els.positionStatus.textContent = state.openTrade ? "Posición abierta" : "Sin posición";
+      els.capitalBox.textContent = money(currentPortfolio);
+      els.pnlBox.innerHTML = `<span class="${cls(pnl)}">${money(pnl)}</span>`;
+      els.operationsBox.textContent = String(state.trades.length);
+      els.winRateBox.textContent = `${winRate.toFixed(0)}%`;
+
+      els.initialCapital.textContent = money(state.initialCapital);
+      els.finalCapital.textContent = money(currentPortfolio);
+      els.winsCount.textContent = String(wins);
+      els.lossCount.textContent = String(losses);
+
+      els.topCompany.textContent = state.selectedCompany;
+      els.topDate.textContent = lastPoint ? lastPoint.date : "-";
+      els.topPrice.textContent = point ? money(point.price) : "-";
+      els.stepPill.textContent = `Paso ${state.currentIndex + 1} / ${series.length}`;
+    }
+
+    function renderTrades(){
+      els.tradesTable.innerHTML = "";
+      if(!state.trades.length){
+        const tr = document.createElement("tr");
+        tr.innerHTML = `<td colspan="7" style="color:#95a5c8;">No hay operaciones registradas todavía.</td>`;
+        els.tradesTable.appendChild(tr);
+        return;
+      }
+
+      state.trades.forEach(t=>{
+        const tr = document.createElement("tr");
+        tr.innerHTML = `
+          <td>${t.company}</td>
+          <td>${t.buyDate}</td>
+          <td>${money(t.buyPrice)}</td>
+          <td>${t.sellDate}</td>
+          <td>${money(t.sellPrice)}</td>
+          <td class="${cls(t.result)}">${money(t.result)}</td>
+          <td class="${cls(t.rent)}">${pct(t.rent)}</td>
+        `;
+        els.tradesTable.appendChild(tr);
+      });
+    }
+
+    function renderDataTable(){
+      const headers = Object.keys(state.rows[0]);
+      els.dataTableHead.innerHTML = `<tr>${headers.map(h=>`<th>${h}</th>`).join("")}</tr>`;
+      els.dataTableBody.innerHTML = "";
+
+      state.rows.forEach(row=>{
+        const tr = document.createElement("tr");
+        tr.innerHTML = headers.map(h=>{
+          const value = row[h] ?? "";
+          if(String(h).includes("%")){
+            const n = parsePercent(value);
+            return `<td class="${cls(n)}">${value}</td>`;
+          }
+          return `<td>${value}</td>`;
+        }).join("");
+        els.dataTableBody.appendChild(tr);
+      });
+    }
+
+    function drawChart(){
+      const canvas = els.chartCanvas;
+      const ctx = canvas.getContext("2d");
+      const series = getCurrentSeries();
+
+      ctx.clearRect(0,0,canvas.width,canvas.height);
+
+      const W = canvas.width;
+      const H = canvas.height;
+      const pad = { top: 26, right: 90, bottom: 60, left: 66 };
+
+      const visible = series.slice(0, state.currentIndex + 1);
+      if(!visible.length) return;
+
+      const prices = visible.map(d=>d.price);
+      const minP = Math.min(...prices);
+      const maxP = Math.max(...prices);
+      const range = maxP - minP || 1;
+
+      const chartW = W - pad.left - pad.right;
+      const chartH = H - pad.top - pad.bottom;
+
+      function xAt(i){
+        return pad.left + (chartW * i / Math.max(visible.length - 1, 1));
+      }
+
+      function yAt(p){
+        return pad.top + (maxP - p) / range * chartH;
+      }
+
+      // background
+      const bg = ctx.createLinearGradient(0,0,0,H);
+      bg.addColorStop(0,"#091737");
+      bg.addColorStop(1,"#07122b");
+      ctx.fillStyle = bg;
+      ctx.fillRect(0,0,W,H);
+
+      // grid
+      ctx.strokeStyle = "rgba(255,255,255,.06)";
+      ctx.lineWidth = 1;
+      for(let i=0;i<=6;i++){
+        const y = pad.top + (chartH/6)*i;
+        ctx.beginPath();
+        ctx.moveTo(pad.left,y);
+        ctx.lineTo(W-pad.right,y);
+        ctx.stroke();
+      }
+      for(let i=0;i<=10;i++){
+        const x = pad.left + (chartW/10)*i;
+        ctx.beginPath();
+        ctx.moveTo(x,pad.top);
+        ctx.lineTo(x,H-pad.bottom);
+        ctx.stroke();
+      }
+
+      // y labels
+      ctx.fillStyle = "#a9bddf";
+      ctx.font = "12px Inter, sans-serif";
+      ctx.textAlign = "left";
+      for(let i=0;i<=6;i++){
+        const value = maxP - (range/6)*i;
+        const y = pad.top + (chartH/6)*i;
+        ctx.fillText(num(value), W - pad.right + 14, y + 4);
+      }
+
+      // x labels
+      ctx.textAlign = "center";
+      const step = Math.max(1, Math.floor(visible.length / 6));
+      for(let i=0;i<visible.length;i+=step){
+        const x = xAt(i);
+        ctx.fillStyle = "#8ea2c8";
+        ctx.fillText(visible[i].date, x, H - 22);
+      }
+
+      // synthetic candles
+      const candleWidth = Math.max(6, Math.min(18, chartW / Math.max(visible.length, 1) * 0.48));
+      for(let i=0;i<visible.length;i++){
+        const current = visible[i];
+        const prevPrice = i === 0 ? current.price : visible[i-1].price;
+        const open = prevPrice;
+        const close = current.price;
+        const high = Math.max(open, close) * 1.012;
+        const low = Math.min(open, close) * 0.988;
+
+        const x = xAt(i);
+        const yo = yAt(open);
+        const yc = yAt(close);
+        const yh = yAt(high);
+        const yl = yAt(low);
+        const color = close >= open ? "#16c784" : "#ff5c77";
+
+        ctx.strokeStyle = color;
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.moveTo(x, yh);
+        ctx.lineTo(x, yl);
+        ctx.stroke();
+
+        ctx.fillStyle = color;
+        const bodyTop = Math.min(yo, yc);
+        const bodyHeight = Math.max(4, Math.abs(yc - yo));
+        ctx.fillRect(x - candleWidth/2, bodyTop, candleWidth, bodyHeight);
+      }
+
+      // current line
+      const currentPoint = visible[visible.length - 1];
+      const currentY = yAt(currentPoint.price);
+      ctx.setLineDash([6,6]);
+      ctx.strokeStyle = "rgba(93,168,255,.9)";
+      ctx.beginPath();
+      ctx.moveTo(pad.left, currentY);
+      ctx.lineTo(W - pad.right, currentY);
+      ctx.stroke();
+      ctx.setLineDash([]);
+
+      ctx.fillStyle = "#5da8ff";
+      ctx.fillRect(W - pad.right + 6, currentY - 11, 72, 22);
+      ctx.fillStyle = "#ffffff";
+      ctx.textAlign = "center";
+      ctx.font = "12px Inter, sans-serif";
+      ctx.fillText(num(currentPoint.price), W - pad.right + 42, currentY + 4);
+
+      // markers
+      state.markers.forEach(m=>{
+        if(m.index > state.currentIndex) return;
+        const x = xAt(m.index);
+        const y = yAt(m.price);
+
+        if(m.type === "buy"){
+          ctx.fillStyle = "#16c784";
+          ctx.beginPath();
+          ctx.moveTo(x, y - 18);
+          ctx.lineTo(x - 9, y - 3);
+          ctx.lineTo(x + 9, y - 3);
+          ctx.closePath();
+          ctx.fill();
+          ctx.fillStyle = "#16c784";
+          ctx.font = "11px Inter, sans-serif";
+          ctx.textAlign = "center";
+          ctx.fillText("BUY", x, y - 24);
+        }else{
+          ctx.fillStyle = "#ff5c77";
+          ctx.beginPath();
+          ctx.moveTo(x, y + 18);
+          ctx.lineTo(x - 9, y + 3);
+          ctx.lineTo(x + 9, y + 3);
+          ctx.closePath();
+          ctx.fill();
+          ctx.fillStyle = "#ff5c77";
+          ctx.font = "11px Inter, sans-serif";
+          ctx.textAlign = "center";
+          ctx.fillText("SELL", x, y + 34);
+        }
+      });
+
+      // border area
+      ctx.strokeStyle = "rgba(255,255,255,.08)";
+      ctx.strokeRect(pad.left, pad.top, chartW, chartH);
+    }
+
+    function showModal(title, text){
+      els.modalTitle.textContent = title;
+      els.modalText.textContent = text;
+      els.modal.classList.remove("hidden");
+    }
+
+    function hideModal(){
+      els.modal.classList.add("hidden");
+    }
+
+    init();
+  </script>
+</body>
+</html>
